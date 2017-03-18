@@ -1,6 +1,10 @@
 package com.hotmoka.android.gallery.view.single;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.UiThread;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.hotmoka.android.gallery.MVC;
@@ -13,6 +17,23 @@ import com.hotmoka.android.gallery.R;
  * reporting the title of the picture below it.
  */
 public class PictureFragment extends com.hotmoka.android.gallery.view.PictureFragment {
+
+    public PictureFragment(){
+        Button shareButton = (Button) getView().findViewById(R.id.share_button);
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                Uri screenshotUri = null;
+                //Uri.parse(MediaStore.Images.Media.EXTERNAL_CONTENT_URI + "/" + 3);
+
+                sharingIntent.setType("image/jpeg");
+                sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
+                startActivity(Intent.createChooser(sharingIntent, "Share image using"));
+
+            }
+        });
+    }
 
     /**
      * Convenience method to create a fragment that shows the picture
