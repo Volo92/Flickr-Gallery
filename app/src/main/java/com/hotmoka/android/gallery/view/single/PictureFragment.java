@@ -19,20 +19,6 @@ import com.hotmoka.android.gallery.R;
 public class PictureFragment extends com.hotmoka.android.gallery.view.PictureFragment {
 
     public PictureFragment(){
-        Button shareButton = (Button) getView().findViewById(R.id.share_button);
-        shareButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-
-                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                Uri screenshotUri = null;
-                //Uri.parse(MediaStore.Images.Media.EXTERNAL_CONTENT_URI + "/" + 3);
-
-                sharingIntent.setType("image/jpeg");
-                sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
-                startActivity(Intent.createChooser(sharingIntent, "Share image using"));
-
-            }
-        });
     }
 
     /**
