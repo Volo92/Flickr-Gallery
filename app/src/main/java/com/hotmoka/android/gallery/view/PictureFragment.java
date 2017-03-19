@@ -50,19 +50,19 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
 
     private void addShareButtonListener(){
 
-        View shareButton = getView().findViewById(R.id.share_button);
+        Button shareButton = (Button) getView().findViewById(R.id.share_button);
         shareButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
-                Uri pictureToShare = Uri.parse(MVC.model.getUrl(positionShown));
+                Bitmap pictureBitmap = MVC.model.getBitmap(positionShown);
 
-                String picturePath = MediaStore.Images.Media.insertImage(getView().getContentResolver(), loadedImage, "", null);
-                Uri screenshotUri = Uri.parse(path);
+                String picturePath = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), pictureBitmap, "", null);
+                Uri pictureUri = Uri.parse(picturePath);
 
                 Intent sharingIntent = new Intent(Intent.ACTION_SEND);
                 sharingIntent.setType("image/*");
-                sharingIntent.putExtra(Intent.EXTRA_STREAM, pictureToShare);
-                startActivity(Intent.createChooser(sharingIntent, "Share image using"));
+                sharingIntent.putExtra(Intent.EXTRA_STREAM, pictureUri);
+                startActivity(Intent.createChooser(sharingIntent, "Share your picture with"));
 
             }
         });
@@ -99,9 +99,15 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
         int position = getArguments().getInt(ARG_POSITION);
         String url;
         positionShown = position;
+
+        Button shareButton = (Button) getView().findViewById(R.id.share_button);
+
         if (!showBitmapIfDownloaded(position) && (url = MVC.model.getUrl(position)) != null) {
+            shareButton.setEnabled(false);
             ((GalleryActivity) getActivity()).showProgressIndicator();
             MVC.controller.onPictureRequired(getActivity(), url);
+        }else{
+            shareButton.setEnabled(true);
         }
     }
 
