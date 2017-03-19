@@ -12,30 +12,38 @@
         android:layout_weight="1"
         android:padding="16dp" />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/picture_title"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="30dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_weight="1"
-            android:gravity="center_horizontal"
-            android:paddingBottom="16dp"
-            android:layout_toLeftOf="@+id/share_button" />
+            android:layout_toLeftOf="@+id/share_button"
+            android:gravity="center_horizontal"/>
 
-        <Button
-            android:id="@id/share_button"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:text="Share"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    </RelativeLayout>
+            <Button
+                android:id="@id/share_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="Share"
+                android:visibility="invisible"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="2dp"/>
+
+    </LinearLayout>
 
 </LinearLayout>
