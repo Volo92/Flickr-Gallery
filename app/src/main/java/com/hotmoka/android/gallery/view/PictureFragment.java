@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.UiThread;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,10 +22,13 @@ import com.hotmoka.android.gallery.model.Pictures;
  * Flickr Gallery app.
  */
 public abstract class PictureFragment extends Fragment implements GalleryFragment {
+
     private final static String ARG_POSITION = "position";
+    private final static String PICTURE_PATH = "picture_path";
+
+    private final static int SHARE_REQUEST = 0;
 
     private int positionShown;
-
     /**
      * This constructor is called when creating the view for the
      * two panes layout and when recreating the fragment upon
@@ -67,10 +69,14 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
         shareButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
+                Uri pictureUri = getCurrentPictureUri();
+
                 Intent sharingIntent = new Intent(Intent.ACTION_SEND);
                 sharingIntent.setType("image/*");
-                sharingIntent.putExtra(Intent.EXTRA_STREAM, getCurrentPictureUri());
-                startActivity(Intent.createChooser(sharingIntent, "Share your picture with"));
+                sharingIntent.putExtra(Intent.EXTRA_STREAM, pictureUri);
+                startActivityForResult(Intent.createChooser(sharingIntent, "Share your picture with"), SHARE_REQUEST);
+
+                getArguments().putString(PICTURE_PATH, pictureUri.toString());
 
             }
         });
@@ -83,6 +89,14 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
         Uri pictureUri = Uri.parse(picturePath);
 
         return pictureUri;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SHARE_REQUEST) {
+            Uri pictureUri = Uri.parse(getArguments().getString(PICTURE_PATH));
+            getActivity().getApplicationContext().getContentResolver().delete(pictureUri, null,null);
+        }
     }
 
     /**
