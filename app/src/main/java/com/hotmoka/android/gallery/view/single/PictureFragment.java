@@ -18,7 +18,11 @@ import com.hotmoka.android.gallery.R;
  */
 public class PictureFragment extends com.hotmoka.android.gallery.view.PictureFragment {
 
-    public PictureFragment(){
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        showPictureOrDownloadIfMissing();
     }
 
     /**
