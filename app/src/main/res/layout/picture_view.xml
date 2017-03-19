@@ -19,6 +19,7 @@
 
         <TextView
             android:id="@+id/picture_title"
+            android:maxLines="1"
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_alignParentLeft="true"
