@@ -54,21 +54,24 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
         shareButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
-                Bitmap pictureBitmap = MVC.model.getBitmap(positionShown);
-
-                String picturePath = MediaStore.Images.Media.insertImage(getActivity().getApplicationContext().getContentResolver(), pictureBitmap, "", "");
-                Uri pictureUri = Uri.parse(picturePath);
-
                 Intent sharingIntent = new Intent(Intent.ACTION_SEND);
                 sharingIntent.setType("image/*");
-                sharingIntent.putExtra(Intent.EXTRA_STREAM, pictureUri);
+                sharingIntent.putExtra(Intent.EXTRA_STREAM, getCurrentPictureUri());
                 startActivity(Intent.createChooser(sharingIntent, "Share your picture with"));
 
             }
         });
     }
 
-    
+    private Uri getCurrentPictureUri(){
+
+        Bitmap pictureBitmap = MVC.model.getBitmap(positionShown);
+
+        String picturePath = MediaStore.Images.Media.insertImage(getActivity().getApplicationContext().getContentResolver(), pictureBitmap, "", "");
+        Uri pictureUri = Uri.parse(picturePath);
+
+        return pictureUri;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
