@@ -48,9 +48,22 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
 
     }
 
-    private void addShareButtonListener(){
+    @Override
+    public View onCreateView(LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
+        View created = inflater.inflate(R.layout.picture_view, container, false);
+        return created;
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        shareButtonInitialization();
+    }
+
+    private void shareButtonInitialization(){
         Button shareButton = (Button) getView().findViewById(R.id.share_button);
+        shareButton.setEnabled(false);
         shareButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
@@ -64,27 +77,12 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
     }
 
     private Uri getCurrentPictureUri(){
-
         Bitmap pictureBitmap = MVC.model.getBitmap(positionShown);
 
         String picturePath = MediaStore.Images.Media.insertImage(getActivity().getApplicationContext().getContentResolver(), pictureBitmap, "", "");
         Uri pictureUri = Uri.parse(picturePath);
 
         return pictureUri;
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        View created = inflater.inflate(R.layout.picture_view, container, false);
-        return created;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        addShareButtonListener();
-        showPictureOrDownloadIfMissing();
     }
 
     /**
@@ -100,7 +98,7 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
     }
 
     @UiThread
-    private void showPictureOrDownloadIfMissing() {
+    protected void showPictureOrDownloadIfMissing() {
         int position = getArguments().getInt(ARG_POSITION);
         String url;
         positionShown = position;
@@ -108,12 +106,15 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
         Button shareButton = (Button) getView().findViewById(R.id.share_button);
 
         if (!showBitmapIfDownloaded(position) && (url = MVC.model.getUrl(position)) != null) {
-            shareButton.setEnabled(false);
             ((GalleryActivity) getActivity()).showProgressIndicator();
             MVC.controller.onPictureRequired(getActivity(), url);
+            shareButton.setEnabled(false);
         }else{
             shareButton.setEnabled(true);
         }
+
+        shareButton.setVisibility(View.VISIBLE);
+
     }
 
     /**
