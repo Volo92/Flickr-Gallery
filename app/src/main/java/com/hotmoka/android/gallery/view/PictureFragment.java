@@ -56,7 +56,7 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
 
                 Bitmap pictureBitmap = MVC.model.getBitmap(positionShown);
 
-                String picturePath = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), pictureBitmap, "", null);
+                String picturePath = MediaStore.Images.Media.insertImage(getActivity().getApplicationContext().getContentResolver(), pictureBitmap, "", "");
                 Uri pictureUri = Uri.parse(picturePath);
 
                 Intent sharingIntent = new Intent(Intent.ACTION_SEND);
@@ -67,6 +67,8 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
             }
         });
     }
+
+    
 
     @Override
     public View onCreateView(LayoutInflater inflater,
