@@ -1,12 +1,16 @@
 package com.hotmoka.android.gallery.view;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.UiThread;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import com.hotmoka.android.gallery.MVC;
@@ -18,8 +22,13 @@ import com.hotmoka.android.gallery.model.Pictures;
  * Flickr Gallery app.
  */
 public abstract class PictureFragment extends Fragment implements GalleryFragment {
-    private final static String ARG_POSITION = "position";
 
+    private final static String ARG_POSITION = "position";
+    private final static String PICTURE_PATH = "picture_path";
+
+    private final static int SHARE_REQUEST = 0;
+
+    private int positionShown;
     /**
      * This constructor is called when creating the view for the
      * two panes layout and when recreating the fragment upon
@@ -28,6 +37,8 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
      */
     @UiThread
     protected PictureFragment() {
+        positionShown = -1;
+
         init(-1);
     }
 
@@ -36,18 +47,56 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
         Bundle args = new Bundle();
         args.putInt(ARG_POSITION, position);
         setArguments(args);
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.picture_view, container, false);
+        View created = inflater.inflate(R.layout.picture_view, container, false);
+        return created;
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        shareButtonInitialization();
         showPictureOrDownloadIfMissing();
+    }
+
+    private void shareButtonInitialization(){
+        Button shareButton = (Button) getView().findViewById(R.id.share_button);
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                Uri pictureUri = getCurrentPictureUri();
+
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                sharingIntent.setType("image/*");
+                sharingIntent.putExtra(Intent.EXTRA_STREAM, pictureUri);
+                startActivityForResult(Intent.createChooser(sharingIntent, "Share your picture with"), SHARE_REQUEST);
+
+                getArguments().putString(PICTURE_PATH, pictureUri.toString());
+
+            }
+        });
+    }
+
+    private Uri getCurrentPictureUri(){
+        Bitmap pictureBitmap = MVC.model.getBitmap(positionShown);
+
+        String picturePath = MediaStore.Images.Media.insertImage(getActivity().getApplicationContext().getContentResolver(), pictureBitmap, "", "");
+        Uri pictureUri = Uri.parse(picturePath);
+
+        return pictureUri;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SHARE_REQUEST) {
+            Uri pictureUri = Uri.parse(getArguments().getString(PICTURE_PATH));
+            getActivity().getApplicationContext().getContentResolver().delete(pictureUri, null,null);
+        }
     }
 
     /**
@@ -63,13 +112,27 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
     }
 
     @UiThread
-    private void showPictureOrDownloadIfMissing() {
+    protected void showPictureOrDownloadIfMissing() {
         int position = getArguments().getInt(ARG_POSITION);
+        positionShown = position;
+
+        Button shareButton = (Button) getView().findViewById(R.id.share_button);
         String url;
+
         if (!showBitmapIfDownloaded(position) && (url = MVC.model.getUrl(position)) != null) {
             ((GalleryActivity) getActivity()).showProgressIndicator();
             MVC.controller.onPictureRequired(getActivity(), url);
+            shareButton.setEnabled(false);
+        }else{
+            shareButton.setEnabled(true);
         }
+
+        if(positionShown != -1){
+            shareButton.setVisibility(View.VISIBLE);
+        }else{
+            shareButton.setVisibility(View.INVISIBLE);
+        }
+
     }
 
     /**

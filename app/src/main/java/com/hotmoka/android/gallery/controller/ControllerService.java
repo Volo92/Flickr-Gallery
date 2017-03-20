@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.WorkerThread;
+import android.util.Log;
 
 import com.hotmoka.android.gallery.MVC;
 import com.hotmoka.android.gallery.R;
