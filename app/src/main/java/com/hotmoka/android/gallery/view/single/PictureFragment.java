@@ -26,7 +26,8 @@ public class PictureFragment extends com.hotmoka.android.gallery.view.PictureFra
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu,inflater);
-        menu.findItem(R.id.menu_item_load).setVisible(false);
+        inflater.inflate(R.menu.share_only_action_bar, menu);
+        updateShareAndShow(menu.findItem(R.id.menu_share));
     }
 
     /**

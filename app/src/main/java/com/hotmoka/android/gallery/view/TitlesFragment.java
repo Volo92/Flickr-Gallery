@@ -52,7 +52,7 @@ public abstract class TitlesFragment extends ListFragment
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_item_load) {
+        if (item.getItemId() == R.id.menu_item_load && MVC.controller.isIdle()) {
             ((GalleryActivity) getActivity()).showProgressIndicator();
             MVC.model.setPictures(new ArrayList<>());
             MVC.controller.onTitlesReloadRequest(getActivity());
@@ -70,10 +70,14 @@ public abstract class TitlesFragment extends ListFragment
 
     @Override @UiThread
     public void onModelChanged(Pictures.Event event) {
-        if (event == PICTURES_LIST_CHANGED)
+        if (event == PICTURES_LIST_CHANGED){
+
             // Show the new list of titles
             setListAdapter(new ArrayAdapter<>(getActivity(),
                     android.R.layout.simple_list_item_activated_1,
                     MVC.model.getTitles()));
+
+        }
+
     }
 }

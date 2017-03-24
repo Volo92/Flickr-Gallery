@@ -31,7 +31,7 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
 
     private final static int SHARE_REQUEST = 0;
 
-    private int positionShown;
+    private int positionShown = -1;
 
     private MenuItem shareItem = null;
 
@@ -43,7 +43,6 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
      */
     @UiThread
     protected PictureFragment() {
-        positionShown = -1;
 
         init(-1);
     }
@@ -64,34 +63,33 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.share_and_load_action_bar, menu);
-        shareItem = menu.findItem(R.id.menu_share);
-
+    public void onStart() {
+        super.onStart();
         showPictureOrDownloadIfMissing();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if(id == R.id.menu_share){
+    public void updateShareAndShow(MenuItem share){
+        shareItem = share;
 
-            Uri pictureUri = getCurrentPictureUri();
+        shareItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
 
-            Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-            sharingIntent.setType("image/*");
-            sharingIntent.putExtra(Intent.EXTRA_STREAM, pictureUri);
-            startActivityForResult(Intent.createChooser(sharingIntent, "Share your picture with"), SHARE_REQUEST);
+                Uri pictureUri = getCurrentPictureUri();
 
-            getArguments().putString(PICTURE_PATH, pictureUri.toString());
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                sharingIntent.setType("image/*");
+                sharingIntent.putExtra(Intent.EXTRA_STREAM, pictureUri);
+                startActivityForResult(Intent.createChooser(sharingIntent, "Share your picture with"), SHARE_REQUEST);
 
-            return true;
-        }
+                getArguments().putString(PICTURE_PATH, pictureUri.toString());
 
-        return super.onOptionsItemSelected(item);
+                return true;
+            }
+        });
+
+        showPictureOrDownloadIfMissing();
     }
-
 
     private Uri getCurrentPictureUri(){
         Bitmap pictureBitmap = MVC.model.getBitmap(positionShown);
@@ -125,6 +123,8 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
     @UiThread
     protected void showPictureOrDownloadIfMissing() {
 
+        if(shareItem==null) return;
+
         int position = getArguments().getInt(ARG_POSITION);
         String url;
         positionShown = position;
@@ -134,6 +134,7 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
         }else{
             shareItem.setVisible(false);
             if((url = MVC.model.getUrl(position)) != null){
+                ((ImageView) getView().findViewById(R.id.picture)).setImageBitmap(null);
                 ((GalleryActivity) getActivity()).showProgressIndicator();
                 MVC.controller.onPictureRequired(getActivity(), url);
             }

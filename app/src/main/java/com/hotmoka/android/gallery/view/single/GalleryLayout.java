@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.MenuItem;
 import android.widget.FrameLayout;
 
 import com.hotmoka.android.gallery.MVC;
@@ -17,6 +18,10 @@ import com.hotmoka.android.gallery.view.GalleryFragment;
  */
 public class GalleryLayout extends FrameLayout
         implements com.hotmoka.android.gallery.view.GalleryLayout {
+
+    public void updateShareAndShow(MenuItem share){
+
+    }
 
     private GalleryFragment getFragment() {
         return (GalleryFragment) getFragmentManager().findFragmentById(R.id.gallery_layout);
@@ -54,6 +59,8 @@ public class GalleryLayout extends FrameLayout
             // Commit the transaction
             .commit();
     }
+
+
 
     @Override
     public void onModelChanged(Pictures.Event event) {

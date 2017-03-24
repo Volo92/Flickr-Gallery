@@ -1,6 +1,7 @@
 package com.hotmoka.android.gallery.view;
 
 import android.support.annotation.UiThread;
+import android.view.MenuItem;
 
 import com.hotmoka.android.gallery.model.Pictures;
 
@@ -9,6 +10,9 @@ import com.hotmoka.android.gallery.model.Pictures;
  * interacts with the user.
  */
 public interface GalleryLayout {
+
+    @UiThread
+    void updateShareAndShow(MenuItem share);
 
     /**
      * Shows the picture at the given position in the model.
