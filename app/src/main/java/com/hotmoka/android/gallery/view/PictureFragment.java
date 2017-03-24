@@ -61,11 +61,11 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
     public void onStart() {
         super.onStart();
         shareButtonInitialization();
-        showPictureOrDownloadIfMissing();
     }
 
     private void shareButtonInitialization(){
         Button shareButton = (Button) getView().findViewById(R.id.share_button);
+        shareButton.setEnabled(false);
         shareButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
@@ -114,10 +114,10 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
     @UiThread
     protected void showPictureOrDownloadIfMissing() {
         int position = getArguments().getInt(ARG_POSITION);
+        String url;
         positionShown = position;
 
         Button shareButton = (Button) getView().findViewById(R.id.share_button);
-        String url;
 
         if (!showBitmapIfDownloaded(position) && (url = MVC.model.getUrl(position)) != null) {
             ((GalleryActivity) getActivity()).showProgressIndicator();
@@ -127,11 +127,7 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
             shareButton.setEnabled(true);
         }
 
-        if(positionShown != -1){
-            shareButton.setVisibility(View.VISIBLE);
-        }else{
-            shareButton.setVisibility(View.INVISIBLE);
-        }
+        shareButton.setVisibility(View.VISIBLE);
 
     }
 
