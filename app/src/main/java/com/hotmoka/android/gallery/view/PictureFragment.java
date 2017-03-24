@@ -8,6 +8,9 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.UiThread;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -29,6 +32,9 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
     private final static int SHARE_REQUEST = 0;
 
     private int positionShown;
+
+    private MenuItem shareItem = null;
+
     /**
      * This constructor is called when creating the view for the
      * two panes layout and when recreating the fragment upon
@@ -58,29 +64,34 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        shareButtonInitialization();
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.share_and_load_action_bar, menu);
+        shareItem = menu.findItem(R.id.menu_share);
+
+        showPictureOrDownloadIfMissing();
     }
 
-    private void shareButtonInitialization(){
-        Button shareButton = (Button) getView().findViewById(R.id.share_button);
-        shareButton.setEnabled(false);
-        shareButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == R.id.menu_share){
 
-                Uri pictureUri = getCurrentPictureUri();
+            Uri pictureUri = getCurrentPictureUri();
 
-                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                sharingIntent.setType("image/*");
-                sharingIntent.putExtra(Intent.EXTRA_STREAM, pictureUri);
-                startActivityForResult(Intent.createChooser(sharingIntent, "Share your picture with"), SHARE_REQUEST);
+            Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+            sharingIntent.setType("image/*");
+            sharingIntent.putExtra(Intent.EXTRA_STREAM, pictureUri);
+            startActivityForResult(Intent.createChooser(sharingIntent, "Share your picture with"), SHARE_REQUEST);
 
-                getArguments().putString(PICTURE_PATH, pictureUri.toString());
+            getArguments().putString(PICTURE_PATH, pictureUri.toString());
 
-            }
-        });
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
+
 
     private Uri getCurrentPictureUri(){
         Bitmap pictureBitmap = MVC.model.getBitmap(positionShown);
@@ -113,21 +124,20 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
 
     @UiThread
     protected void showPictureOrDownloadIfMissing() {
+
         int position = getArguments().getInt(ARG_POSITION);
         String url;
         positionShown = position;
 
-        Button shareButton = (Button) getView().findViewById(R.id.share_button);
-
-        if (!showBitmapIfDownloaded(position) && (url = MVC.model.getUrl(position)) != null) {
-            ((GalleryActivity) getActivity()).showProgressIndicator();
-            MVC.controller.onPictureRequired(getActivity(), url);
-            shareButton.setEnabled(false);
+        if(showBitmapIfDownloaded(position)){
+            shareItem.setVisible(true);
         }else{
-            shareButton.setEnabled(true);
+            shareItem.setVisible(false);
+            if((url = MVC.model.getUrl(position)) != null){
+                ((GalleryActivity) getActivity()).showProgressIndicator();
+                MVC.controller.onPictureRequired(getActivity(), url);
+            }
         }
-
-        shareButton.setVisibility(View.VISIBLE);
 
     }
 

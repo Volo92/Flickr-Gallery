@@ -14,6 +14,8 @@ import com.hotmoka.android.gallery.MVC;
 import com.hotmoka.android.gallery.R;
 import com.hotmoka.android.gallery.model.Pictures;
 
+import java.util.ArrayList;
+
 import static com.hotmoka.android.gallery.model.Pictures.Event.PICTURES_LIST_CHANGED;
 
 /**
@@ -49,15 +51,10 @@ public abstract class TitlesFragment extends ListFragment
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_titles, menu);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_item_load) {
             ((GalleryActivity) getActivity()).showProgressIndicator();
+            MVC.model.setPictures(new ArrayList<>());
             MVC.controller.onTitlesReloadRequest(getActivity());
             return true;
         }

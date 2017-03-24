@@ -1,10 +1,9 @@
 package com.hotmoka.android.gallery.view.single;
 
-import android.content.Intent;
-import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.UiThread;
-import android.view.View;
-import android.widget.Button;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.TextView;
 
 import com.hotmoka.android.gallery.MVC;
@@ -18,11 +17,16 @@ import com.hotmoka.android.gallery.R;
  */
 public class PictureFragment extends com.hotmoka.android.gallery.view.PictureFragment {
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        showPictureOrDownloadIfMissing();
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu,inflater);
+        menu.findItem(R.id.menu_item_load).setVisible(false);
     }
 
     /**
