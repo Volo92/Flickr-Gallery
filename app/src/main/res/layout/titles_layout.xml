@@ -5,16 +5,16 @@
     android:layout_height="match_parent">
 
     <ImageView
+        android:id="@+id/image"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_margin="5dp"
-        android:background="@drawable/ic_launcher"/>
+        android:layout_margin="5dp"/>
 
     <TextView
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:layout_margin="5dp"
-        android:gravity="center_vertical"
-        android:text="@string/flick_key"/>
+        android:gravity="center_vertical" />
 
 </LinearLayout>

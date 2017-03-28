@@ -1,18 +1,29 @@
 package com.hotmoka.android.gallery.view;
 
 import android.app.ListFragment;
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Debug;
+import android.provider.Settings;
 import android.support.annotation.UiThread;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.hotmoka.android.gallery.MVC;
+import com.hotmoka.android.gallery.PicturesList;
+import com.hotmoka.android.gallery.PicturesListAdapter;
 import com.hotmoka.android.gallery.R;
+import com.hotmoka.android.gallery.model.Picture;
 import com.hotmoka.android.gallery.model.Pictures;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static com.hotmoka.android.gallery.model.Pictures.Event.PICTURES_LIST_CHANGED;
 
@@ -30,9 +41,20 @@ public abstract class TitlesFragment extends ListFragment
 
         // Show the titles, or the empty list if there is none yet
         String[] titles = MVC.model.getTitles();
-        setListAdapter(new ArrayAdapter<>(getActivity(),
-                android.R.layout.simple_list_item_activated_1,
-                titles == null ? new String[0] : titles));
+        if (titles != null)
+        {
+            ArrayList<Picture> pictures = new ArrayList<>();
+            for(int i = 0; i < titles.length; i++) {
+                String url = MVC.model.getUrl(i);
+                String title = titles[i];
+                Picture picture = new Picture(title, url);
+                pictures.add(picture);
+            }
+
+            PicturesListAdapter adapter = new PicturesListAdapter(getActivity(), pictures);
+            setListAdapter(adapter);
+        }
+
 
         // If no titles exist yet, ask the controller to reload them
         if (titles == null) {
@@ -51,7 +73,7 @@ public abstract class TitlesFragment extends ListFragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_titles, menu);
+        //inflater.inflate(R.menu.fragment_titles, menu);
     }
 
     @Override
@@ -74,9 +96,22 @@ public abstract class TitlesFragment extends ListFragment
     @Override @UiThread
     public void onModelChanged(Pictures.Event event) {
         if (event == PICTURES_LIST_CHANGED)
+        {
+            String[] titles = MVC.model.getTitles();
+            ArrayList<Picture> pictures = new ArrayList<>();
+            for(int i = 0; i < titles.length; i++) {
+                String url = MVC.model.getUrl(i);
+                String title = titles[i];
+                Picture picture = new Picture(title, url);
+                pictures.add(picture);
+            }
+
+            PicturesListAdapter adapter = new PicturesListAdapter(getActivity(), pictures);
+            setListAdapter(adapter);
+        }
             // Show the new list of titles
-            setListAdapter(new ArrayAdapter<>(getActivity(),
-                    android.R.layout.simple_list_item_activated_1,
-                    MVC.model.getTitles()));
+            //setListAdapter(new ArrayAdapter<>(getActivity(),
+                    //android.R.layout.simple_list_item_activated_1,
+                    //MVC.model.getTitles()));
     }
 }
