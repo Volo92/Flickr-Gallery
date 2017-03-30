@@ -21,6 +21,7 @@ import java.util.List;
 public class PicturesListAdapter extends ArrayAdapter<Picture> {
 
     List<Picture> list;
+    ImageView currentImage;
 
     public PicturesListAdapter(Context context, ArrayList<Picture> picturesList)
     {
@@ -35,9 +36,9 @@ public class PicturesListAdapter extends ArrayAdapter<Picture> {
         {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.titles_layout, parent, false);
         }
-        ImageView image = (ImageView) convertView.findViewById(R.id.image);
+        currentImage = (ImageView) convertView.findViewById(R.id.image);
         TextView text = (TextView) convertView.findViewById(R.id.title);
-        image.setImageBitmap(MVC.model.getBitmap(position));
+        currentImage.setImageBitmap(MVC.model.getBitmap(position));
         text.setText(picture.title);
 
         return convertView;
