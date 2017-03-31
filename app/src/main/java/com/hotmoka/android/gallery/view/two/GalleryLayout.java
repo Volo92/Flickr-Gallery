@@ -2,7 +2,9 @@ package com.hotmoka.android.gallery.view.two;
 
 import android.app.Activity;
 import android.content.Context;
+import android.support.annotation.UiThread;
 import android.util.AttributeSet;
+import android.view.MenuItem;
 import android.widget.LinearLayout;
 
 import com.hotmoka.android.gallery.MVC;
@@ -12,6 +14,10 @@ import com.hotmoka.android.gallery.view.GalleryActivity;
 
 public class GalleryLayout extends LinearLayout
         implements com.hotmoka.android.gallery.view.GalleryLayout {
+
+    public void updateShareAndShow(MenuItem share){
+        getPictureFragment().updateShareAndShow(share);
+    }
 
     private TitlesFragment getTitlesFragment() {
         return (TitlesFragment) ((Activity) getContext())

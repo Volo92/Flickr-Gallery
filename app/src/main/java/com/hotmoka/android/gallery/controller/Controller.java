@@ -2,6 +2,7 @@ package com.hotmoka.android.gallery.controller;
 
 import android.content.Context;
 import android.support.annotation.UiThread;
+import android.view.MenuItem;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,6 +13,11 @@ import com.hotmoka.android.gallery.MVC;
  * of long-running background tasks.
  */
 public class Controller {
+
+    @UiThread
+    public void onMenuShareItemCreated(MenuItem share) {
+        MVC.forEachView(view -> view.updateShareAndShow(share));
+    }
 
     /**
      * A counter of the number of background tasks currently running.

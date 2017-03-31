@@ -3,5 +3,6 @@
 <resources>
     <string name="app_name">Flickr Gallery</string>
     <string name="load_action">Load Latest</string>
+    <string name="share_action">Share</string>
     <string name="flick_key">87d13baa0a4b69dbda7b790026391a07</string>
 </resources>

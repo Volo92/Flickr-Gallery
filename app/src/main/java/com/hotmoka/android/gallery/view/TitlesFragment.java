@@ -87,15 +87,10 @@ public abstract class TitlesFragment extends ListFragment
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        //inflater.inflate(R.menu.fragment_titles, menu);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_item_load) {
+        if (item.getItemId() == R.id.menu_item_load && MVC.controller.isIdle()) {
             ((GalleryActivity) getActivity()).showProgressIndicator();
+            MVC.model.setPictures(new ArrayList<>());
             MVC.controller.onTitlesReloadRequest(getActivity());
             return true;
         }
@@ -111,8 +106,8 @@ public abstract class TitlesFragment extends ListFragment
 
     @Override @UiThread
     public void onModelChanged(Pictures.Event event) {
-        if (event == PICTURES_LIST_CHANGED)
-        {
+        if (event == PICTURES_LIST_CHANGED){
+
             String[] titles = MVC.model.getTitles();
             ArrayList<Picture> pictures = new ArrayList<>();
             for(int i = 0; i < titles.length; i++) {

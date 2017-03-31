@@ -8,6 +8,9 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.UiThread;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -28,7 +31,10 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
 
     private final static int SHARE_REQUEST = 0;
 
-    private int positionShown;
+    private int positionShown = -1;
+
+    private MenuItem shareItem = null;
+
     /**
      * This constructor is called when creating the view for the
      * two panes layout and when recreating the fragment upon
@@ -37,7 +43,6 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
      */
     @UiThread
     protected PictureFragment() {
-        positionShown = -1;
 
         init(-1);
     }
@@ -60,14 +65,15 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
     @Override
     public void onStart() {
         super.onStart();
-        shareButtonInitialization();
         showPictureOrDownloadIfMissing();
     }
 
-    private void shareButtonInitialization(){
-        Button shareButton = (Button) getView().findViewById(R.id.share_button);
-        shareButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
+    public void updateShareAndShow(MenuItem share){
+        shareItem = share;
+
+        shareItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
 
                 Uri pictureUri = getCurrentPictureUri();
 
@@ -78,8 +84,11 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
 
                 getArguments().putString(PICTURE_PATH, pictureUri.toString());
 
+                return true;
             }
         });
+
+        showPictureOrDownloadIfMissing();
     }
 
     private Uri getCurrentPictureUri(){
@@ -113,24 +122,22 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
 
     @UiThread
     protected void showPictureOrDownloadIfMissing() {
+
+        if(shareItem==null) return;
+
         int position = getArguments().getInt(ARG_POSITION);
+        String url;
         positionShown = position;
 
-        Button shareButton = (Button) getView().findViewById(R.id.share_button);
-        String url;
-
-        if (!showBitmapIfDownloaded(position) && (url = MVC.model.getUrl(position)) != null) {
-            ((GalleryActivity) getActivity()).showProgressIndicator();
-            MVC.controller.onPictureRequired(getActivity(), url);
-            shareButton.setEnabled(false);
+        if(showBitmapIfDownloaded(position)){
+            shareItem.setVisible(true);
         }else{
-            shareButton.setEnabled(true);
-        }
-
-        if(positionShown != -1){
-            shareButton.setVisibility(View.VISIBLE);
-        }else{
-            shareButton.setVisibility(View.INVISIBLE);
+            shareItem.setVisible(false);
+            if((url = MVC.model.getUrl(position)) != null){
+                ((ImageView) getView().findViewById(R.id.picture)).setImageBitmap(null);
+                ((GalleryActivity) getActivity()).showProgressIndicator();
+                MVC.controller.onPictureRequired(getActivity(), url);
+            }
         }
 
     }
