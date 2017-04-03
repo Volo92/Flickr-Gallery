@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.Delayed;
 
+import static com.hotmoka.android.gallery.model.Pictures.Event.BITMAP_CHANGED;
 import static com.hotmoka.android.gallery.model.Pictures.Event.PICTURES_LIST_CHANGED;
 
 /**
@@ -63,7 +64,6 @@ public abstract class TitlesFragment extends ListFragment
 
         // If no titles exist yet, ask the controller to reload them
         if (titles == null) {
-            //((GalleryActivity) getActivity()).showProgressIndicator();
             MVC.controller.onTitlesReloadRequest(getActivity());
         }
     }
@@ -73,17 +73,6 @@ public abstract class TitlesFragment extends ListFragment
         super.onCreate(savedInstanceState);
         // This fragment uses menus
         setHasOptionsMenu(true);
-        boolean flag = true;
-        if (flag){
-            flag = false;
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    onActivityCreated(savedInstanceState);
-                }
-            }, 5000);
-        }
     }
 
     @Override
@@ -121,10 +110,13 @@ public abstract class TitlesFragment extends ListFragment
             setListAdapter(adapter);
             showPictureOrDownloadIfMissing();
         }
-            // Show the new list of titles
-            //setListAdapter(new ArrayAdapter<>(getActivity(),
-                    //android.R.layout.simple_list_item_activated_1,
-                    //MVC.model.getTitles()));
+        if (event == BITMAP_CHANGED){
+
+            PicturesListAdapter adapter = (PicturesListAdapter) getListAdapter();
+            adapter.notifyDataSetChanged();
+            ((GalleryActivity) getActivity()).hideProgressIndicator();
+
+        }
     }
 
     @UiThread
@@ -135,9 +127,8 @@ public abstract class TitlesFragment extends ListFragment
 
         for (int i = 0; i < listSize; i++)
         {
-            Picture currentPicture = (Picture) getListAdapter().getItem(i);
             if (!showBitmapIfDownloaded(MVC.model.getBitmap(i)) && (url = MVC.model.getUrl(i)) != null) {
-                MVC.controller.onPictureRequired(getActivity(), url);
+                MVC.controller.onPictureRequired(getActivity(), url, false);
             }
         }
 

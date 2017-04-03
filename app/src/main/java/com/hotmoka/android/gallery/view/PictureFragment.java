@@ -92,7 +92,7 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
     }
 
     private Uri getCurrentPictureUri(){
-        Bitmap pictureBitmap = MVC.model.getBitmap(positionShown);
+        Bitmap pictureBitmap = MVC.model.getBitmapHigh(positionShown);
 
         String picturePath = MediaStore.Images.Media.insertImage(getActivity().getApplicationContext().getContentResolver(), pictureBitmap, "", "");
         Uri pictureUri = Uri.parse(picturePath);
@@ -133,10 +133,10 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
             shareItem.setVisible(true);
         }else{
             shareItem.setVisible(false);
-            if((url = MVC.model.getUrl(position)) != null){
+            if((url = MVC.model.getUrlHigh(position)) != null){
                 ((ImageView) getView().findViewById(R.id.picture)).setImageBitmap(null);
                 ((GalleryActivity) getActivity()).showProgressIndicator();
-                MVC.controller.onPictureRequired(getActivity(), url);
+                MVC.controller.onPictureRequired(getActivity(), url, true);
             }
         }
 
@@ -151,7 +151,7 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
      */
     @UiThread
     protected boolean showBitmapIfDownloaded(int position) {
-        Bitmap bitmap = MVC.model.getBitmap(position);
+        Bitmap bitmap = MVC.model.getBitmapHigh(position);
         if (bitmap != null) {
             ((ImageView) getView().findViewById(R.id.picture)).setImageBitmap(bitmap);
             return true;

@@ -37,6 +37,7 @@ public class PicturesListAdapter extends ArrayAdapter<Picture> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.titles_layout, parent, false);
         }
         currentImage = (ImageView) convertView.findViewById(R.id.image);
+        currentImage.setTag("image");
         TextView text = (TextView) convertView.findViewById(R.id.title);
         currentImage.setImageBitmap(MVC.model.getBitmap(position));
         text.setText(picture.title);

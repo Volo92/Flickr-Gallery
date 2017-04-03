@@ -28,6 +28,7 @@ public class Pictures {
      * The url from where their bitmaps can be download.
      */
     private String[] urls;
+    private String[] urlsHigh;
 
     /**
      * A map from each url to the downloaded bitmap.
@@ -60,6 +61,14 @@ public class Pictures {
             return bitmaps.get(urls[position]);
     }
 
+    @UiThread
+    public synchronized Bitmap getBitmapHigh(int position) {
+        if (urlsHigh == null || position < 0 || position >= urlsHigh.length)
+            return null;
+        else
+            return bitmaps.get(urlsHigh[position]);
+    }
+
     /**
      * Yields the url from where it is possible to download the bitmap
      * corresponding to the title at the given position, if any.
@@ -71,6 +80,11 @@ public class Pictures {
     @UiThread
     public synchronized String getUrl(int position) {
         return urls != null && position >= 0 && position < urls.length ? urls[position] : null;
+    }
+
+    @UiThread
+    public synchronized String getUrlHigh(int position) {
+        return urlsHigh != null && position >= 0 && position < urlsHigh.length ? urlsHigh[position] : null;
     }
 
     /**
@@ -104,6 +118,26 @@ public class Pictures {
         synchronized (this) {
             this.titles = titlesAsArray;
             this.urls = urlsAsArray;
+            this.bitmaps.clear();
+        }
+
+        // Tell all registered views that the list of pictures has changed
+        notifyViews(Event.PICTURES_LIST_CHANGED);
+    }
+
+    @WorkerThread @UiThread
+    public void setPicturesHigh(Iterable<Picture> pictures) {
+        List<String> urls = new ArrayList<>();
+
+        for (Picture picture: pictures) {
+            urls.add(picture.url);
+        }
+
+        String[] urlsAsArray = urls.toArray(new String[urls.size()]);
+
+        // Synchronize for the shortest possible time
+        synchronized (this) {
+            this.urlsHigh = urlsAsArray;
             this.bitmaps.clear();
         }
 

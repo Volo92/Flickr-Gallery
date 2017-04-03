@@ -20,8 +20,14 @@ class BitmapFetcher {
     private final static String TAG = BitmapFetcher.class.getSimpleName();
 
     @WorkerThread
-    BitmapFetcher(String url) {
+    BitmapFetcher(String url, boolean highQuality) {
         Bitmap bitmap = null;
+
+        if (highQuality)
+        {
+            url = url.substring(0, url.length() - 5);
+            url += "z.jpg";
+        }
 
         try {
             Log.d(TAG, "Loading image " + url);

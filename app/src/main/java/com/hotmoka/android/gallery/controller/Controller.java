@@ -31,9 +31,9 @@ public class Controller {
      * @param context the context that requires the picture
      * @param url the address where the picture can be found and downloaded
      */
-    public void onPictureRequired(Context context, String url) {
+    public void onPictureRequired(Context context, String url, boolean highQuality) {
         taskCounter.incrementAndGet();
-        ControllerService.fetchPicture(context, url);
+        ControllerService.fetchPicture(context, url, highQuality);
     }
 
     /**

@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.hotmoka.android.gallery.MVC;
 import com.hotmoka.android.gallery.model.Picture;
+import com.hotmoka.android.gallery.view.GalleryActivity;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -32,20 +33,36 @@ class ListOfPicturesFetcher {
 
     @WorkerThread
     ListOfPicturesFetcher(int howMany, String APIKey) {
-        List<Picture> items = fetchItems(howMany, APIKey);
+        List<Picture> items = fetchItems(howMany, APIKey, false);
+        List<Picture> itemsHigh = fetchItems(howMany, APIKey, true);
         MVC.controller.taskFinished();
         MVC.model.setPictures(items);
+        MVC.model.setPicturesHigh(itemsHigh);
+
     }
 
-    private List<Picture> fetchItems(int howMany, String APIKey) {
+    private List<Picture> fetchItems(int howMany, String APIKey, boolean highQuality) {
         try {
             // Build a query to Flickr's webservice
-            String url = Uri.parse(ENDPOINT).buildUpon()
-                    .appendQueryParameter("method", "flickr.photos.getRecent")
-                    .appendQueryParameter("api_key", APIKey)
-                    .appendQueryParameter("extras", "url_z")
-                    .appendQueryParameter("per_page", String.valueOf(howMany))
-                    .build().toString();
+            String url;
+            if (highQuality)
+            {
+                url = Uri.parse(ENDPOINT).buildUpon()
+                        .appendQueryParameter("method", "flickr.photos.getRecent")
+                        .appendQueryParameter("api_key", APIKey)
+                        .appendQueryParameter("extras", "url_z")
+                        .appendQueryParameter("per_page", String.valueOf(howMany))
+                        .build().toString();
+            } else
+            {
+                url = Uri.parse(ENDPOINT).buildUpon()
+                        .appendQueryParameter("method", "flickr.photos.getRecent")
+                        .appendQueryParameter("api_key", APIKey)
+                        .appendQueryParameter("extras", "url_t")
+                        .appendQueryParameter("per_page", String.valueOf(howMany))
+                        .build().toString();
+            }
+
 
             Log.i(TAG, "Sent query: " + url);
             String xmlString = getFrom(url);
@@ -54,7 +71,7 @@ class ListOfPicturesFetcher {
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             XmlPullParser parser = factory.newPullParser();
             parser.setInput(new StringReader(xmlString));
-            return parseItems(parser);
+            return parseItems(parser, highQuality);
         }
         catch (IOException | XmlPullParserException e) {
             Log.e(TAG, "Failed to fetch items", e);
@@ -88,13 +105,20 @@ class ListOfPicturesFetcher {
         }
     }
 
-    private List<Picture> parseItems(XmlPullParser parser) throws XmlPullParserException, IOException {
+    private List<Picture> parseItems(XmlPullParser parser, boolean highQuality) throws XmlPullParserException, IOException {
         List<Picture> items = new ArrayList<>();
 
         for (int eventType = parser.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = parser.next())
             if (eventType == XmlPullParser.START_TAG && "photo".equals(parser.getName())) {
                 String caption = parser.getAttributeValue(null, "title");
-                String url = parser.getAttributeValue(null, "url_z");
+                String url;
+                if (highQuality)
+                {
+                    url = parser.getAttributeValue(null, "url_z");
+                } else
+                {
+                    url = parser.getAttributeValue(null, "url_t");
+                }
                 if (caption == null || caption.isEmpty() || url == null)
                     // The picture might be missing or not have this size
                     continue;
@@ -103,6 +127,7 @@ class ListOfPicturesFetcher {
                     caption = caption.substring(0, MAX_TITLE_LENGTH - 3) + "...";
 
                 items.add(new Picture(caption, url));
+
             }
 
         return items;

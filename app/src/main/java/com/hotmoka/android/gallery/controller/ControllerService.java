@@ -19,6 +19,7 @@ public class ControllerService extends IntentService {
     private final static String PARAM_API_KEY = "API key";
     private final static String ACTION_FETCH_BITMAP = "fetch bitmap";
     private final static String PARAM_URL = "url";
+    private static final String ACTION_FETCH_BITMAP_HIGH = "fetch bitmap high quality";
 
     public ControllerService() {
         super("gallery controller");
@@ -44,9 +45,15 @@ public class ControllerService extends IntentService {
      * @param context the context that needs the picture
      * @param url the address from where the picture can be downloaded
      */
-    static void fetchPicture(Context context, String url) {
+    static void fetchPicture(Context context, String url, boolean highQuality) {
         Intent intent = new Intent(context, ControllerService.class);
-        intent.setAction(ACTION_FETCH_BITMAP);
+        if (highQuality)
+        {
+            intent.setAction(ACTION_FETCH_BITMAP_HIGH);
+        } else
+        {
+            intent.setAction(ACTION_FETCH_BITMAP);
+        }
         intent.putExtra(PARAM_URL, url);
         context.startService(intent);
     }
@@ -65,7 +72,10 @@ public class ControllerService extends IntentService {
                         intent.getStringExtra(PARAM_API_KEY));
                 break;
             case ACTION_FETCH_BITMAP:
-                new BitmapFetcher(intent.getStringExtra(PARAM_URL));
+                new BitmapFetcher(intent.getStringExtra(PARAM_URL), false);
+                break;
+            case ACTION_FETCH_BITMAP_HIGH:
+                new BitmapFetcher(intent.getStringExtra(PARAM_URL), true);
                 break;
         }
     }
