@@ -165,7 +165,7 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
             case BITMAP_CHANGED_HIGH: {
                 // A new bitmap arrived: update the picture in the view
                 showPictureOrDownloadIfMissing();
-                MVC.controller.resetTaskCounter();
+                ((GalleryActivity) getActivity()).hideProgressIndicator();
                 break;
             }
             case PICTURES_LIST_CHANGED:

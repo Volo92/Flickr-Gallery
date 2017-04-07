@@ -41,6 +41,8 @@ import static com.hotmoka.android.gallery.model.Pictures.Event.PICTURES_LIST_CHA
 public abstract class TitlesFragment extends ListFragment
         implements GalleryFragment {
 
+    boolean stopReload = false;
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -76,12 +78,11 @@ public abstract class TitlesFragment extends ListFragment
         setHasOptionsMenu(true);
     }
 
-    boolean fermatiPls = false;
-
     @Override
-    public synchronized boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_item_load && MVC.controller.isIdle() && !fermatiPls) {
-            fermatiPls=true;
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.menu_item_load && MVC.controller.isIdle() && !stopReload) {
+            stopReload=true;
             ((GalleryActivity) getActivity()).showProgressIndicator();
             MVC.model.setPictures(new ArrayList<>());
             MVC.controller.onTitlesReloadRequest(getActivity());
@@ -134,9 +135,11 @@ public abstract class TitlesFragment extends ListFragment
         {
             if (!showBitmapIfDownloaded(MVC.model.getBitmap(i)) && (url = MVC.model.getUrl(i)) != null) {
                 MVC.controller.onPictureRequired(getActivity(), url, false);
-                fermatiPls = false;
             }
         }
+
+        stopReload = false;
+
 
     }
 
