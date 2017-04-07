@@ -33,36 +33,18 @@ class ListOfPicturesFetcher {
 
     @WorkerThread
     ListOfPicturesFetcher(int howMany, String APIKey) {
-        List<Picture> items = fetchItems(howMany, APIKey, false);
-        List<Picture> itemsHigh = fetchItems(howMany, APIKey, true);
-        MVC.controller.taskFinished();
-        MVC.model.setPictures(items);
-        MVC.model.setPicturesHigh(itemsHigh);
-
+        fetchItems(howMany, APIKey);
     }
 
-    private List<Picture> fetchItems(int howMany, String APIKey, boolean highQuality) {
+    private void fetchItems(int howMany, String APIKey) {
         try {
             // Build a query to Flickr's webservice
-            String url;
-            if (highQuality)
-            {
-                url = Uri.parse(ENDPOINT).buildUpon()
+            String url = Uri.parse(ENDPOINT).buildUpon()
                         .appendQueryParameter("method", "flickr.photos.getRecent")
                         .appendQueryParameter("api_key", APIKey)
-                        .appendQueryParameter("extras", "url_z")
+                        .appendQueryParameter("extras", "url_z, url_sq")
                         .appendQueryParameter("per_page", String.valueOf(howMany))
                         .build().toString();
-            } else
-            {
-                url = Uri.parse(ENDPOINT).buildUpon()
-                        .appendQueryParameter("method", "flickr.photos.getRecent")
-                        .appendQueryParameter("api_key", APIKey)
-                        .appendQueryParameter("extras", "url_t")
-                        .appendQueryParameter("per_page", String.valueOf(howMany))
-                        .build().toString();
-            }
-
 
             Log.i(TAG, "Sent query: " + url);
             String xmlString = getFrom(url);
@@ -71,11 +53,12 @@ class ListOfPicturesFetcher {
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             XmlPullParser parser = factory.newPullParser();
             parser.setInput(new StringReader(xmlString));
-            return parseItems(parser, highQuality);
+            parseItems(parser);
         }
         catch (IOException | XmlPullParserException e) {
             Log.e(TAG, "Failed to fetch items", e);
-            return Collections.<Picture> emptyList();
+            MVC.model.setPicturesHigh(new ArrayList<>());
+            MVC.model.setPictures(new ArrayList<>());
         }
     }
 
@@ -105,31 +88,36 @@ class ListOfPicturesFetcher {
         }
     }
 
-    private List<Picture> parseItems(XmlPullParser parser, boolean highQuality) throws XmlPullParserException, IOException {
+    private void parseItems(XmlPullParser parser) throws XmlPullParserException, IOException {
         List<Picture> items = new ArrayList<>();
+        List<Picture> itemsLow = new ArrayList<>();
 
-        for (int eventType = parser.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = parser.next())
+        for (int eventType = parser.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = parser.next()) {
             if (eventType == XmlPullParser.START_TAG && "photo".equals(parser.getName())) {
                 String caption = parser.getAttributeValue(null, "title");
-                String url;
-                if (highQuality)
-                {
-                    url = parser.getAttributeValue(null, "url_z");
-                } else
-                {
-                    url = parser.getAttributeValue(null, "url_t");
-                }
-                if (caption == null || caption.isEmpty() || url == null)
+                if (caption == null || caption.isEmpty()) {
                     // The picture might be missing or not have this size
                     continue;
-
+                }
                 if (caption.length() > MAX_TITLE_LENGTH)
                     caption = caption.substring(0, MAX_TITLE_LENGTH - 3) + "...";
 
-                items.add(new Picture(caption, url));
+                String url = parser.getAttributeValue(null, "url_z");
+                if (url != null) {
+                    items.add(new Picture(caption, url));
+                }else{
+                    items.add(new Picture(caption, "https://farm3.staticflickr.com/2924/33766530181_0b2211c3fd_z.jpg"));
+                }
+                url = parser.getAttributeValue(null, "url_sq");
+                if (url != null) {
+                    itemsLow.add(new Picture(caption, url));
+                }else{
+                    items.add(new Picture(caption, "https://farm3.staticflickr.com/2924/33766530181_0b2211c3fd_s.jpg"));
+                }
 
             }
-
-        return items;
+        }
+        MVC.model.setPicturesHigh(items);
+        MVC.model.setPictures(itemsLow);
     }
 }

@@ -8,6 +8,7 @@ import android.os.Debug;
 import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.UiThread;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -75,9 +76,12 @@ public abstract class TitlesFragment extends ListFragment
         setHasOptionsMenu(true);
     }
 
+    boolean fermatiPls = false;
+
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_item_load && MVC.controller.isIdle()) {
+    public synchronized boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_item_load && MVC.controller.isIdle() && !fermatiPls) {
+            fermatiPls=true;
             ((GalleryActivity) getActivity()).showProgressIndicator();
             MVC.model.setPictures(new ArrayList<>());
             MVC.controller.onTitlesReloadRequest(getActivity());
@@ -108,6 +112,7 @@ public abstract class TitlesFragment extends ListFragment
 
             PicturesListAdapter adapter = new PicturesListAdapter(getActivity(), pictures);
             setListAdapter(adapter);
+            MVC.controller.taskFinished();
             showPictureOrDownloadIfMissing();
         }
         if (event == BITMAP_CHANGED){
@@ -129,6 +134,7 @@ public abstract class TitlesFragment extends ListFragment
         {
             if (!showBitmapIfDownloaded(MVC.model.getBitmap(i)) && (url = MVC.model.getUrl(i)) != null) {
                 MVC.controller.onPictureRequired(getActivity(), url, false);
+                fermatiPls = false;
             }
         }
 

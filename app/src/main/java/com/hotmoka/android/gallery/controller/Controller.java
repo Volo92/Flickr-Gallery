@@ -1,12 +1,15 @@
 package com.hotmoka.android.gallery.controller;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.annotation.UiThread;
 import android.view.MenuItem;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.hotmoka.android.gallery.MVC;
+
+import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 
 /**
  * The controller reacts to user events and allows the execution
@@ -33,7 +36,18 @@ public class Controller {
      */
     public void onPictureRequired(Context context, String url, boolean highQuality) {
         taskCounter.incrementAndGet();
-        ControllerService.fetchPicture(context, url, highQuality);
+        AsyncTask downloader = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] params) {
+                ControllerService.fetchPicture(context, url, highQuality);
+                return null;
+            }
+        };
+        if(highQuality){
+            ControllerService.fetchPicture(context, url, highQuality);
+        }else{
+            downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     /**
@@ -65,7 +79,12 @@ public class Controller {
     /**
      * Takes note that a background task has finished.
      */
-    void taskFinished() {
+
+    public void addTask() {
+        taskCounter.incrementAndGet();
+    }
+
+    public void taskFinished() {
         taskCounter.decrementAndGet();
     }
 
@@ -74,7 +93,7 @@ public class Controller {
      * This is called in the unlikely case that the OS destroys
      * the companion service, with all queued tasks.
      */
-    void resetTaskCounter() {
+    public void resetTaskCounter() {
         taskCounter.set(0);
     }
 }

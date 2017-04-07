@@ -3,6 +3,7 @@ package com.hotmoka.android.gallery.controller;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 
@@ -49,13 +50,20 @@ public class ControllerService extends IntentService {
         Intent intent = new Intent(context, ControllerService.class);
         if (highQuality)
         {
-            intent.setAction(ACTION_FETCH_BITMAP_HIGH);
+            AsyncTask downloader = new AsyncTask() {
+                @Override
+                protected Object doInBackground(Object[] params) {
+                    new BitmapFetcher(url, true);
+                    return null;
+                }
+            };
+            downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else
         {
             intent.setAction(ACTION_FETCH_BITMAP);
+            intent.putExtra(PARAM_URL, url);
+            context.startService(intent);
         }
-        intent.putExtra(PARAM_URL, url);
-        context.startService(intent);
     }
 
     @Override

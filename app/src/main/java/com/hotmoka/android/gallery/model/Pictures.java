@@ -92,7 +92,8 @@ public class Pictures {
      */
     public enum Event {
         PICTURES_LIST_CHANGED,
-        BITMAP_CHANGED
+        BITMAP_CHANGED,
+        BITMAP_CHANGED_HIGH
     }
 
     /**
@@ -158,7 +159,11 @@ public class Pictures {
         }
 
         // Tell all registered views that a bitmap changed
-        notifyViews(Event.BITMAP_CHANGED);
+        if(url.contains("_z.")){
+            notifyViews(Event.BITMAP_CHANGED_HIGH);
+        }else{
+            notifyViews(Event.BITMAP_CHANGED);
+        }
     }
 
     /**

@@ -65,7 +65,6 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
     @Override
     public void onStart() {
         super.onStart();
-        showPictureOrDownloadIfMissing();
     }
 
     public void updateShareAndShow(MenuItem share){
@@ -163,9 +162,10 @@ public abstract class PictureFragment extends Fragment implements GalleryFragmen
     @UiThread
     public void onModelChanged(Pictures.Event event) {
         switch (event) {
-            case BITMAP_CHANGED: {
+            case BITMAP_CHANGED_HIGH: {
                 // A new bitmap arrived: update the picture in the view
                 showPictureOrDownloadIfMissing();
+                MVC.controller.resetTaskCounter();
                 break;
             }
             case PICTURES_LIST_CHANGED:
