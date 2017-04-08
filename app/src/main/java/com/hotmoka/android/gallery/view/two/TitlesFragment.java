@@ -47,7 +47,7 @@ public class TitlesFragment extends com.hotmoka.android.gallery.view.TitlesFragm
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_item_load) {
+        if (item.getItemId() == R.id.menu_item_load && MVC.controller.isIdle()) {
             shareItem.setVisible(false);
         }
         return super.onOptionsItemSelected(item);
